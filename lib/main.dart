@@ -1,423 +1,210 @@
 import 'package:flutter/material.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(UnitConverter());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Homepage(),
-    );
-  }
-}
-
-class Homepage extends StatefulWidget {
-  const Homepage({Key? key}) : super(key: key);
+class UnitConverter extends StatefulWidget{
 
   @override
-  State<Homepage> createState() => _HomepageState();
+  UnitConverterState createState() => UnitConverterState();
 }
 
-class _HomepageState extends State<Homepage> {
-  List measureitem = [
-    'Length',
-    'Mass',
-    'Temperature',
-    'Volume',
-    'Angles'
+class UnitConverterState extends State<UnitConverter>{
+
+  String _resultMessage = "";
+  double _numberFrom = 0;
+  String _startMeasure = "meters";
+  String _convertedMeasure = "meters";
+
+  final List<String> _measures = [
+    'meters',
+    'kilometers',
+    'grams',
+    'kilograms',
+    'feet',
+    'miles',
+    'pounds (lbs)',
+    'ounces'
   ];
-  int measurevalue = 0;
-  String initout = '0';
-  String targetout = '0';
-  bool inputreversed = false;
-  List<String> Length = ['Millimetres','Centimetres','Metres','Kilometres','Inches','Feet','Yards','Miles','Nautical Miles'];
-  String? sellength = 'Centimetres';
-  List<String> Length1 = ['Millimetres','Centimetres','Metres','Kilometres','Inches','Feet','Yards','Miles','Nautical Miles'];
-  String? sellength1 = 'Inches';
 
-  void cmtoin(){
-    if (inputreversed){
-      if (targetout!='') {
-        initout = (double.parse(targetout) * 2.54).toString();
-        if (initout.length > 7) {
-          initout = double.parse(initout).toStringAsFixed(7);
-          if (initout.substring(6,7)=='.'){
-            initout = initout.substring(0,6);
-          }
-        }
-        if (initout.length > 7) {
-          initout = initout.substring(0,7);
-        }
-      }
-    } else {
-      if (initout!='') {
-        targetout = (double.parse(initout) / 2.54).toString();
-        if (targetout.length > 7) {
-          targetout = double.parse(targetout).toStringAsFixed(7);
-          if (targetout.substring(6,7)=='.'){
-            targetout = targetout.substring(0,6);
-          }
-        }
+  final Map<String, int> _measuresMap = {
+    'meters':0,
+    'kilometers':1,
+    'grams':2,
+    'kilograms':3,
+    'feets':4,
+    'miles':5,
+    'pounds (lbs)':6,
+    'ounces':7
+  };
 
-        if (targetout.length > 7) {
-          targetout = targetout.substring(0,7);
-        }
-      }
-    }
-  }
-  void numtap(String a){
-    if (inputreversed){
-      if (targetout=='0'){
-        targetout=a;
-      } else if (targetout.length==7){
-        null;
-      } else {
-        targetout+=a;
-      }
-    } else {
-      if (initout=='0'){
-        initout=a;
-      } else if (initout.length==7){
-        null;
-      } else {
-        initout+=a;
-      }
-    }
-    cmtoin();
-    setState((){});
-  }
+  final dynamic _formulas = {
+    '0':[1,0.001,0,0,3.28084,0.000621371,0,0],
+    '1':[1000,1,0,0,3280.84,0.621371,0,0],
+    '2':[0,0,1,0.0001,0,0,0.00220462,0.035274],
+    '3':[0,0,1000,1,0,0,2.20462,35.274],
+    '4':[0.3048,0.0003048,0,0,1,0.000189394,0,0],
+    '5':[1609.34, 1.60934,0,0,5280,1,0,0],
+    '6':[0,0,453.592,0.453592,0,0,1,16],
+    '7':[0,0,28.3495,0.0283495,3.28084,0,0.0625, 1],
+  };
 
-  void backtap(){
-    if (inputreversed){
-      if (targetout==''){
-        null;
-      } else if (targetout.length==1){
-        targetout='';
-      } else {
-        targetout=targetout.substring(0,targetout.length-1);
-      }
-    } else {
-      if (initout==''){
-        null;
-      } else if (initout.length==1){
-        initout='';
-      } else {
-        initout=initout.substring(0,initout.length-1);
-      }
-    }
-    if (initout=='' || targetout==''){
-      cleartap();
-    }
-    cmtoin();
-    setState((){});
-  }
-
-  void cleartap(){
-    targetout='';
-    initout='';
-    setState((){});
-  }
-
-  void decimaltap(){
-    if (inputreversed){
-      if (targetout==''){
-        targetout='0.';
-      } else if (targetout.contains('.')) {
-        null;
-      } else {
-        targetout+='.';
-      }
-    } else {
-      if (initout==''){
-        initout='0.';
-      } else if (initout.contains('.')) {
-        null;
-      } else {
-        initout+='.';
-      }
-    }
-    cmtoin();
-    setState((){});
-  }
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      //This is the code for building App Bar
-      //Scaffold Implements the basic Material Design visual layout structure.
-      //here we have returned scaffold only to build our app
-        backgroundColor: Colors.black,
-        appBar: AppBar(
-          title: Text('Unit Conversion App'),
-          backgroundColor: Colors.black,
-        ),
-        body: SafeArea(
-          child: Column(
-            children: [
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [ SizedBox(width: 15),
-                    Row(
-                      children: List.generate(
-                          5, (int index) {
-                        return Container(
-                          margin: EdgeInsets.all(2),
-                          child: ChoiceChip(
-                            label: Text('${measureitem[index]}',
-                              style: TextStyle(color: Colors.purpleAccent),),
-                            selected: measurevalue == index,
-                            onSelected: ((bool selected) {
-                              setState(() {
-                                if (selected) {
-                                  measurevalue = index;
-                                }
-                              });
-                            }),
-                            selectedColor: Colors.grey[50],
-                            tooltip: '${measureitem[index]}',
-                            backgroundColor: Colors.black,
-                          ),
-                        );
-                      }
-                      ).toList(),
-                    ),
-                  ],
-                ),
-              ),
-              Row(
-                  children: [
-                    Container(
-                      alignment: Alignment.centerLeft,
-                      width: 250,
-                      margin: EdgeInsets.only(left: 10),
-                      child: SelectableText(
-                        initout,style: TextStyle(color: Colors.white, fontSize: 50), showCursor: true,),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(top: 15),
-                      child: DropdownButton(
-                        dropdownColor: Colors.black,
-                        value: sellength,
-                        onChanged: (String? selected){
-                          sellength = selected;
-                          setState((){});
-                        },
-                        items: Length.map((String value){
-                          return DropdownMenuItem<String>(child: Text('$value',style: TextStyle(color: Colors.white)),value: value,);
-                        }).toList(),
-                      ),
-                    ),
-                    Spacer(flex: 13,),
-                  ]
-              ),
-              Row(
-                  children: [
-              Container(
-                alignment: Alignment.centerLeft,
-                width: 250,
-                margin: EdgeInsets.only(left: 10),
-                child: SelectableText(
-                  targetout,style: TextStyle(color: Colors.white, fontSize: 50), showCursor: true,),
-              ),
-              Container(
-                margin: EdgeInsets.only(top: 10),
-                child: DropdownButton(
-                  dropdownColor: Colors.black,
-                  value: sellength1,
-                  onChanged: (String? selected){
-                    sellength1 = selected;
-                    setState((){});
-                  },
-                  items: Length1.map((String value){
-                    return DropdownMenuItem<String>(child: Text('$value',style: TextStyle(color: Colors.white)),value: value,);
-                  }).toList(),
-                ),
-              ),
+  void initState(){
+    _numberFrom = 0;
+    super.initState();
+  }
 
-    ],
-    ),
-              SizedBox(
-                height: 30.0,
-              ),
-              Table(
-              defaultColumnWidth: FractionColumnWidth(.23),
-          children: [
-            TableRow(
-                children: [
-                  Container(
-                    padding: EdgeInsets.only(bottom: 10),
-                    child: RawMaterialButton(
-                      onPressed: (){
-                        numtap('7');
-                      },
-                      child: Text('7',style: TextStyle(color: Colors.purpleAccent[100], fontSize: 30),),
-                      fillColor: Colors.grey[900],
-                      shape: CircleBorder(),
-                      padding: EdgeInsets.all(16.0),
-                    ),
-                  ),
-                  RawMaterialButton(
-                    onPressed: (){
-                      numtap('8');
-                    },
-                    child: Text('8',style: TextStyle(color: Colors.purpleAccent[100], fontSize: 30),),
-                    fillColor: Colors.grey[900],
-                    shape: CircleBorder(),
-                    padding: EdgeInsets.all(16.0),
-                  ),
-                  RawMaterialButton(
-                    onPressed: (){
-                      numtap('9');
-                    },
-                    child: Text('9',style: TextStyle(color: Colors.purpleAccent[100], fontSize: 30),),
-                    fillColor: Colors.grey[900],
-                    shape: CircleBorder(),
-                    padding: EdgeInsets.all(16.0),
-                  ),
-                  RawMaterialButton(
-                    onPressed: (){
-                      backtap();
-                    },
-                    child: Icon(Icons.backspace_outlined, size: 25, color:  Colors.purpleAccent[100],),
-                    fillColor: Colors.grey[900],
-                    shape: CircleBorder(),
-                    padding: EdgeInsets.all(21.0),
-                  ),
-                ]
-            ),
-            TableRow(
-                children: [
-                  Container(
-                    padding: EdgeInsets.only(bottom: 10),
-                    child: RawMaterialButton(
-                      onPressed: (){
-                        numtap('4');
-                      },
-                      child: Text('4',style: TextStyle(color: Colors.purpleAccent[100], fontSize: 30),),
-                      fillColor: Colors.grey[900],
-                      shape: CircleBorder(),
-                      padding: EdgeInsets.all(16.0),
-                    ),),
-                  RawMaterialButton(
-                    onPressed: (){
-                      numtap('5');
-                    },
-                    child: Text('5',style: TextStyle(color: Colors.purpleAccent[100], fontSize: 30),),
-                    fillColor: Colors.grey[900],
-                    shape: CircleBorder(),
-                    padding: EdgeInsets.all(16.0),
-                  ),
-                  RawMaterialButton(
-                    onPressed: (){
-                      numtap('6');
-                    },
-                    child: Text('6',style: TextStyle(color: Colors.purpleAccent[100], fontSize: 30),),
-                    fillColor: Colors.grey[900],
-                    shape: CircleBorder(),
-                    padding: EdgeInsets.all(16.0),
-                  ),
-                  RawMaterialButton(
-                    onPressed: (){
-                      cleartap();
-                    },
-                    child: Text('C',style: TextStyle(color: Colors.red[500], fontSize: 30),),
-                    fillColor: Colors.grey[900],
-                    shape: CircleBorder(),
-                    padding: EdgeInsets.all(16.0),
-                  ),
-                ]
-            ),
-            TableRow(
-                children: [
-                  Container(
-                    padding: EdgeInsets.only(bottom: 10),
-                    child: RawMaterialButton(
-                      onPressed: (){
-                        numtap('1');
-                      },
-                      child: Text('1',style: TextStyle(color: Colors.purpleAccent[100], fontSize: 30),),
-                      fillColor: Colors.grey[900],
-                      shape: CircleBorder(),
-                      padding: EdgeInsets.all(16.0),
-                    ),),
-                  RawMaterialButton(
-                    onPressed: (){
-                      numtap('2');
-                    },
-                    child: Text('2',style: TextStyle(color: Colors.purpleAccent[100], fontSize: 30),),
-                    fillColor: Colors.grey[900],
-                    shape: CircleBorder(),
-                    padding: EdgeInsets.all(16.0),
-                  ),
-                  RawMaterialButton(
-                    onPressed: (){
-                      numtap('3');
-                    },
-                    child: Text('3',style: TextStyle(color: Colors.purpleAccent[100], fontSize: 30),),
-                    fillColor: Colors.grey[900],
-                    shape: CircleBorder(),
-                    padding: EdgeInsets.all(16.0),
-                  ),
-                  RawMaterialButton(
-                    onPressed: (){
-                      inputreversed = inputreversed ? false : true;
-                    },
-                    child: Icon(Icons.multiple_stop, size: 25, color:  Colors.purpleAccent[100],),
-                    fillColor: Colors.grey[900],
-                    shape: CircleBorder(),
-                    padding: EdgeInsets.all(21.0),
-                  ),
-                ]
-            ),
-            TableRow(
-                children: [
-                  Container(
-                      padding: EdgeInsets.only(bottom: 10),
-                      child: RawMaterialButton(
-                        onPressed: (){null;},
-                        child: Text('+/-',style: TextStyle(color: Colors.purpleAccent[100], fontSize: 30),),
-                        fillColor: Colors.grey[900],
-                        shape: CircleBorder(),
-                        padding: EdgeInsets.all(16.0),
-                      )),
-                  RawMaterialButton(
-                    onPressed: (){
-                      numtap('0');
-                    },
-                    child: Text('0',style: TextStyle(color: Colors.purpleAccent[100], fontSize: 30),),
-                    fillColor: Colors.grey[900],
-                    shape: CircleBorder(),
-                    padding: EdgeInsets.all(16.0),
-                  ),
-                  RawMaterialButton(
-                    onPressed: (){
-                      decimaltap();
-                    },
-                    child: Text('.',style: TextStyle(color: Colors.purpleAccent[100], fontSize: 30),),
-                    fillColor: Colors.grey[900],
-                    shape: CircleBorder(),
-                    padding: EdgeInsets.all(16.0),
-                  ),
-                  RawMaterialButton(
-                    onPressed: (){
-                      Navigator.pushNamed(context, '/settings');
-                    },
-                    child: Icon(Icons.settings, size: 25, color:  Colors.purpleAccent[100],),
-                    fillColor: Colors.grey[900],
-                    shape: CircleBorder(),
-                    padding: EdgeInsets.all(21.0),
-                  ),
-                ]
-            )
-          ],
-        )
+  @override
+  Widget build(BuildContext context){
 
-    ]
-    )
-    )
+    final TextStyle inputStyle = TextStyle(
+      fontSize: 20,
+      color: Colors.red,
+      fontWeight: FontWeight.bold,
     );
+
+    final TextStyle labelStyle = TextStyle(
+      fontSize: 24,
+      color: Colors.deepOrangeAccent,
+      fontWeight: FontWeight.bold,
+    );
+    return MaterialApp(
+      title: "Measures App",
+      home: Scaffold(
+          resizeToAvoidBottomInset: false,
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            title: Text("Unit Conversion", style: labelStyle,
+            ),
+          ),
+          body: Container(
+            color: Colors.black,
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 30.0,
+                  ),
+                  Text(
+                    'Enter the Value ',
+                    style: labelStyle,
+                  ),
+                  Spacer(),
+                  TextField(
+                    keyboardType: TextInputType.number,
+                    style: inputStyle,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.white24,
+                        hintText: "Insert the value to be converted",
+                    ),
+                    onChanged: (text){
+                      var rv = double.tryParse(text);
+                      if(rv != null){
+                        setState(() {
+                          _numberFrom = rv;
+                        });
+                      }
+                    },
+                  ),
+                  SizedBox(
+                    height: 50.0,
+                  ),
+                  Text(
+                    'From',
+                    style: labelStyle,
+                  ),
+                  SizedBox(
+                    height: 30.0,
+                  ),
+                  DropdownButton(
+                    value: _startMeasure,
+                    onChanged: (String? newValue){
+                      setState(() {
+                        _startMeasure = newValue!;
+                      });
+                    },
+                    items: _measures.map<DropdownMenuItem<String>>((String value){
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(
+                          value,
+                          style: inputStyle,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  SizedBox(
+                    height: 50.0,
+                  ),
+                  Text(
+                    'To',
+                    style: labelStyle,
+                  ),
+                  SizedBox(
+                    height: 30.0,
+                  ),
+                  DropdownButton(
+                    value: _convertedMeasure,
+                    onChanged: (String? newValue){
+                      setState(() {
+                        _convertedMeasure = newValue!;
+                      });
+                    },
+                    items: _measures.map<DropdownMenuItem<String>>((String value){
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value,
+                            style: inputStyle),
+                      );
+                    }).toList(),
+                  ),
+                  SizedBox(
+                    height: 50.0,
+                  ),
+                  ElevatedButton(
+                    child: Text('Convert', style: TextStyle(
+                      color: Colors.black
+                    ),),
+                    onPressed: (){
+                      if(_startMeasure.isEmpty || _convertedMeasure.isEmpty || _numberFrom == 0){
+                        return;
+                      }else{
+                        convert(_numberFrom, _startMeasure, _convertedMeasure);
+                      }
+                    },
+                    style: ButtonStyle(
+                      backgroundColor:MaterialStateProperty.all(Colors.deepOrangeAccent),
+                    ),
+                  ),
+                  Spacer(flex: 2,),
+                  Text(
+                    (_resultMessage == '') ? '' : _resultMessage,
+                    style: labelStyle,
+                  ),
+                  Spacer(flex: 10,),
+                ],
+              )
+          )
+      ),
+    );
+  }
+
+  void convert(double value, String from, String to){
+    int? nFrom = _measuresMap[from];
+    int? nTo = _measuresMap[to];
+    var multiplier = _formulas[nFrom.toString()] [nTo];
+    var result = value * multiplier;
+
+    if(result == 0){
+      _resultMessage = "This conversion cannot be performed";
+    }else{
+      _resultMessage = '${_numberFrom.toString()} ${_startMeasure} are '
+          '${result.toString()} ${_convertedMeasure}';
+    }
+    setState(() {
+      _resultMessage = _resultMessage;
+    });
   }
 }
